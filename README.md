@@ -13,7 +13,7 @@ Create the following files in your project
 .env.test
 .env.development
 
-After you created the files you need to add the following:
+After you created the files you need to add the following in each .env file:
 PGDATABASE = <your database here>
 
 

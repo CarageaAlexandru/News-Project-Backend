@@ -33,3 +33,9 @@ describe("1. GET /api/topics", () => {
 			});
 	});
 });
+
+describe("Error handing", () => {
+	test("1.GET /api/topickssS should respond with status 404 and display a message for the user", () => {
+		return request(app).get("/api/topickssS").expect(404);
+	});
+});

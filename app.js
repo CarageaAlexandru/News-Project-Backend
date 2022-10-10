@@ -1,17 +1,16 @@
 const express = require("express");
 const { getArticleById } = require("./controllers/articles");
 const { getTopics } = require("./controllers/topics");
+const { getAllUsers } = require("./controllers/users");
 const app = express();
 
 app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);
+app.get("/api/users", getAllUsers);
 
 // Handling JavaScript errors
 app.use((error, req, res, next) => {
-	console.log(error.message);
-	console.log(error.status);
 	if (error.status && error.message) {
-        console.log(error.status)
 		res.status(error.status).send({
 			message: error.message,
 		});

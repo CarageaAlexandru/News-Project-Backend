@@ -8,10 +8,7 @@ app.get("/api/articles/:article_id", getArticleById);
 
 // Handling JavaScript errors
 app.use((error, req, res, next) => {
-	console.log(error.message);
-	console.log(error.status);
 	if (error.status && error.message) {
-        console.log(error.status)
 		res.status(error.status).send({
 			message: error.message,
 		});

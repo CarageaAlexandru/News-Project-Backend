@@ -9,7 +9,20 @@ module.exports.fetchArticleById = (article_id) => {
 		});
 	}
 	return pool
-		.query("SELECT * FROM articles where article_id = $1", [article_id])
+		.query(
+			`
+			SELECT articles.* ,
+			COUNT (comments.article_id)::INT AS comment_count
+			FROM
+			comments
+			RIGHT JOIN articles
+			ON
+			articles.article_id = comments.article_id
+			WHERE articles.article_id = $1
+			GROUP BY (articles.article_id)
+`,
+			[article_id]
+		)
 		.then(({ rows: article }) => {
 			if (article.length === 0) {
 				return Promise.reject({
@@ -17,7 +30,7 @@ module.exports.fetchArticleById = (article_id) => {
 					message: "Article id not found in database.",
 				});
 			}
-			return article;
+			return article[0];
 		})
 		.catch((error) => {
 			return Promise.reject(error);

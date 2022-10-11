@@ -76,10 +76,34 @@ describe("Endpoint integration", () => {
 				});
 		});
 	});
+	describe("6. PATCH /api/articles/:article_id", () => {
+		test(`should update articles by id : accept an object in the form of 
+			{ inc_votes : newVote } and should respond with updated object.`, () => {
+			const newVote = { inc_votes: 10 };
+			return request(app)
+				.patch("/api/articles/1")
+				.send(newVote)
+				.expect(200)
+				.then(({ body }) => {
+					const { updated_article } = body;
+					expect(updated_article).toBeInstanceOf(Object);
+					expect(updated_article).toEqual({
+						author: "butter_bridge",
+						title: "Living in the shadow of a great man",
+						article_id: 1,
+						body: "I find this existence challenging",
+						topic: "mitch",
+						created_at: "2020-07-09T20:11:00.000Z",
+						votes: 110,
+					});
+				});
+		});
+	});
 });
+
 describe("Error handing", () => {
 	describe("1. GET /api/topics", () => {
-		test("1.GET /api/topickssS should respond with status 404 ", () => {
+		test("1.GET /api/topickssS should respond with status 404 if endpoint is not correct", () => {
 			return request(app).get("/api/topickssS").expect(404);
 		});
 	});
@@ -106,9 +130,49 @@ describe("Error handing", () => {
 		});
 	});
 	describe("3. GET /api/users", () => {
-		test("should respond with status 404", () => {
+		test("should respond with status 404 if endpoint is not correct", () => {
 			return request(app).get("/api/usersWrong").expect(404);
 		});
 	});
+	describe("4. PATCH /api/articles/:article_id", () => {
+		const newVote = { inc_votes: 10 };
+		test("should respond with status 400 if endpoint is not correct", () => {
+			return request(app)
+				.patch("/api/articles/badInput")
+				.send(newVote)
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"Invalid argument passed - number expected."
+					);
+				});
+		});
+		test("should respond with status 400 if :/article_id is not a number", () => {
+			const newVote = { inc_votes: "invalid" };
+			return request(app)
+				.patch("/api/articles/1")
+				.send(newVote)
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"Invalid argument passed - number expected."
+					);
+				});
+		});
+		test("should respond with status 400 if object is miss spelled", () => {
+			const newVote = { inc_voteres: 10 };
+			return request(app)
+				.patch("/api/articles/1")
+				.send(newVote)
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"Invalid object passed - must be inc_votes."
+					);
+				});
+		});
+	});
 });
-

@@ -34,8 +34,55 @@ describe("1. GET /api/topics", () => {
 	});
 });
 
+describe("2. GET /api/articles/:article_id", () => {
+	test(`should respond with status:200 and display an article object with following properties:
+		author - username from the users table
+		title, article_id, body, topic, created_at, votes`, () => {
+		return request(app)
+			.get("/api/articles/2")
+			.expect(200)
+			.then(({ body }) => {
+				const { article } = body;
+				expect(article).toBeInstanceOf(Object);
+				expect.objectContaining({
+					author: "jessjelly",
+					title: "The Rise Of Thinking Machines: How IBM's Watson Takes On The World",
+					article_id: 2,
+					body: "Many people know Watson as the IBM-developed cognitive super computer that won the Jeopardy! gameshow in 2011. In truth, Watson is not actually a computer but a set of algorithms and APIs, and since winning TV fame (and a $1 million prize) IBM has put it to use tackling tough problems in every industry from healthcare to finance. Most recently, IBM has announced several new partnerships which aim to take things even further, and put its cognitive capabilities to use solving a whole new range of problems around the world.",
+					topic: "coding",
+					created_at: "2020-05-14 01:02:00",
+					votes: 0,
+				});
+			});
+	});
+});
+
 describe("Error handing", () => {
-	test("1.GET /api/topickssS should respond with status 404 and display a message for the user", () => {
-		return request(app).get("/api/topickssS").expect(404);
+	describe("1. GET /api/topics", () => {
+		test("1.GET /api/topickssS should respond with status 404 and display a message for the user", () => {
+			return request(app).get("/api/topickssS").expect(404);
+		});
+	});
+	describe("2. GET /api/articles/:article_id", () => {
+		test("should respond with 400 if invalid article_id is passed", () => {
+			return request(app)
+				.get("/api/articles/article")
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"Invalid argument passed - number expected"
+					);
+				});
+		});
+		test("should respond with 404 if article_id is not found in the database", () => {
+			return request(app)
+				.get("/api/articles/99999")
+				.expect(404)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe("Article id not found in database.");
+				});
+		});
 	});
 });

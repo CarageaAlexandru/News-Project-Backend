@@ -196,6 +196,36 @@ describe("Endpoint integration", () => {
 				});
 		});
 	});
+	describe("9. GET /api/articles/:article_id/comments", () => {
+		test(`should respons with an array of comments for the given article_id.
+		Each comment should have the following properties:
+		comment_id
+		votes
+		created_at
+		author
+		body`, () => {
+			return request(app)
+				.get("/api/articles/1/comments")
+				.expect(200)
+				.then(({ body }) => {
+					const { comments } = body;
+					expect(comments).toBeInstanceOf(Array);
+					expect(comments).toHaveLength(11);
+					expect(comments).toBeSortedBy("created_at", {
+						descending: true,
+					});
+					comments.forEach((comment) => {
+						expect(comment).toEqual({
+							comment_id: expect.any(Number),
+							votes: expect.any(Number),
+							created_at: expect.any(String),
+							author: expect.any(String),
+							body: expect.any(String),
+						});
+					});
+				});
+		});
+	});
 });
 
 describe("Error handing", () => {
@@ -281,6 +311,19 @@ describe("Error handing", () => {
 					const { message } = body;
 					expect(message).toBe(
 						"There are no matches based on specified topic in the database."
+					);
+				});
+		});
+	});
+	describe('9. GET /api/articles/:article_id/comments', () => {
+		test(`should return status:200 if sorting query: "topic" does not exist in database.`, () => {
+			return request(app)
+				.get("/api/articles/9899532/comments")
+				.expect(404)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"There are no matches based on specified article_id in the database."
 					);
 				});
 		});

@@ -315,8 +315,8 @@ describe("Error handing", () => {
 				});
 		});
 	});
-	describe('9. GET /api/articles/:article_id/comments', () => {
-		test(`should return status:200 if sorting query: "topic" does not exist in database.`, () => {
+	describe("9. GET /api/articles/:article_id/comments", () => {
+		test(`should return status:404 article_id does not exist in database.`, () => {
 			return request(app)
 				.get("/api/articles/9899532/comments")
 				.expect(404)

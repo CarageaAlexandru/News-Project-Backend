@@ -14,8 +14,8 @@ module.exports.fetchArticleById = (article_id) => {
 			SELECT articles.* ,
 			COUNT (comments.article_id)::INT AS comment_count
 			FROM
-			comments
-			LEFT JOIN articles
+			articles
+			LEFT JOIN comments
 			ON
 			articles.article_id = comments.article_id
 			WHERE articles.article_id = $1

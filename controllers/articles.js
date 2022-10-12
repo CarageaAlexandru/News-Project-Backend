@@ -5,11 +5,14 @@ const {
 } = require("../models/articles");
 
 module.exports.getAllArticles = (request, response, next) => {
-	fetchAllArticles().then((articles) => {
-		response.status(200).send({ articles });
-	}).catch((error) =>{
-		next(error)
-	});
+	const { topic } = request.query;
+	fetchAllArticles(topic)
+		.then((articles) => {
+			response.status(200).send({ articles });
+		})
+		.catch((error) => {
+			next(error);
+		});
 };
 
 module.exports.getArticleById = (request, response, next) => {

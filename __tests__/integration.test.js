@@ -154,9 +154,9 @@ describe("Endpoint integration", () => {
 					});
 				});
 		});
-		xtest(`should accept the following query: topic which filters the topic by specified value
+		test(`should accept the following query: topic which filters the topic by specified value
 			If the query is omitted the endpoing should respond with all articles`, () => {
-				return request(app)
+			return request(app)
 				.get("/api/articles?topic=mitch")
 				.expect(200)
 				.then(({ body }) => {
@@ -174,10 +174,27 @@ describe("Endpoint integration", () => {
 						});
 					});
 				});
-			});
-		// The end point should also accept the following query:
-		// - topic, which filters the articles by the topic value specified in the query.
-		// If the query is omitted the endpoint should respond with all articles.
+		});
+		test("should accept topic as query and filter the topics by specified value", () => {
+			return request(app)
+				.get("/api/articles?topic=cats")
+				.expect(200)
+				.then(({ body }) => {
+					const { articles } = body;
+					expect(articles).toBeInstanceOf(Array);
+					expect(articles).toHaveLength(1);
+					articles.forEach((article) => {
+						expect.objectContaining({
+							author: expect.any(String),
+							title: expect.any(String),
+							topic: "cats",
+							created_at: expect.any(String),
+							votes: expect.any(Number),
+							comment_count: expect.any(Number),
+						});
+					});
+				});
+		});
 	});
 });
 
@@ -251,6 +268,19 @@ describe("Error handing", () => {
 					const { message } = body;
 					expect(message).toBe(
 						"Invalid object passed - must be inc_votes."
+					);
+				});
+		});
+	});
+	describe("5. GET /api/articles", () => {
+		test(`should return status:200 if sorting query: "topic" does not exist in database.`, () => {
+			return request(app)
+				.get("/api/articles?topic=badInput")
+				.expect(200)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"There are no matches based on specified topic in the database."
 					);
 				});
 		});

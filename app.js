@@ -18,6 +18,7 @@ app.get("/api/articles", getAllArticles);
 
 // Handling JavaScript errors
 app.use((error, req, res, next) => {
+	console.log(error);
 	if (error.status && error.message) {
 		res.status(error.status).send({
 			message: error.message,
@@ -29,7 +30,7 @@ app.use((error, req, res, next) => {
 
 // Handling psql errors
 app.use((error, req, res, next) => {
-	// console.log(error);
+	console.log(error);
 	if (error.code === "22P02") {
 		res.status(400).send({
 			message: "Invalid argument passed - number expected.",

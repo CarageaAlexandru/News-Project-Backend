@@ -115,3 +115,32 @@ module.exports.fetchCommentsByArticleId = (article_id) => {
 			return comments;
 		});
 };
+
+module.exports.insertCommentByArticleId = (newComment, article_id) => {
+	const { username, body } = newComment;
+
+	if (
+		username === undefined ||
+		body === undefined ||
+		username.length === 0 ||
+		body.length === 0
+	) {
+		return Promise.reject({
+			status: 400,
+			message:
+				"Object properties are not valid - username and body should not be empty.",
+		});
+	}
+	return pool
+		.query(
+			`
+			INSERT INTO comments(article_id, author, body)
+			VALUES ($1, $2, $3)
+			RETURNING *;`,
+			[article_id, username, body]
+		)
+		.then(({ rows: insertedComment }) => {
+			console.log(insertedComment);
+			return insertedComment[0];
+		});
+};

@@ -226,6 +226,32 @@ describe("Endpoint integration", () => {
 				});
 		});
 	});
+	describe("10. POST /api/articles/:article_id/comments", () => {
+		test(`should post a comment to specified article_id,
+		the body should accept and object with following properties:
+		username
+		body.`, () => {
+			const newComment = {
+				username: "butter_bridge",
+				body: "There's no shame in fear, my father told me, what matters is how we face it.",
+			};
+			return request(app)
+				.post("/api/articles/1/comments")
+				.send(newComment)
+				.expect(201)
+				.then(({ body }) => {
+					const { insertedComment } = body;
+					expect(insertedComment).toEqual({
+						article_id: 1,
+						comment_id: expect.any(Number),
+						votes: expect.any(Number),
+						created_at: expect.any(String),
+						author: "butter_bridge",
+						body: "There's no shame in fear, my father told me, what matters is how we face it.",
+					});
+				});
+		});
+	});
 });
 
 describe("Error handing", () => {
@@ -315,7 +341,7 @@ describe("Error handing", () => {
 				});
 		});
 	});
-	describe("9. GET /api/articles/:article_id/comments", () => {
+	describe("6. GET /api/articles/:article_id/comments", () => {
 		test(`should return status:404 article_id does not exist in database.`, () => {
 			return request(app)
 				.get("/api/articles/9899532/comments")
@@ -324,6 +350,63 @@ describe("Error handing", () => {
 					const { message } = body;
 					expect(message).toBe(
 						"There are no matches based on specified article_id in the database."
+					);
+				});
+		});
+	});
+	describe("7. POST /api/articles/:article_id/comments", () => {
+		test("should respond with status:400 if properties are miss-spelled", () => {
+			const missSpelledPropertiesComment = {
+				useeername: "butter",
+				bodyyy: "test error handling",
+			};
+			return request(app)
+				.post("/api/articles/2/comments")
+				.send(missSpelledPropertiesComment)
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"Object properties are not valid - username and body should not be empty."
+					);
+				});
+		});
+		test("should respond with status:400 if empty properties are passed in", () => {
+			const emptyPropertiesComment = {
+				username: "",
+				body: "",
+			};
+			return request(app)
+				.post("/api/articles/2/comments")
+				.send(emptyPropertiesComment)
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"Object properties are not valid - username and body should not be empty."
+					);
+				});
+		});
+
+		test("should respond with status:404 if article_id is not in the database", () => {
+			return request(app)
+				.get("/api/articles/9899532/comments")
+				.expect(404)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"There are no matches based on specified article_id in the database."
+					);
+				});
+		});
+		test("should respond with status:400 article_id is not a number", () => {
+			return request(app)
+				.get("/api/articles/notANumber/comments")
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"Invalid argument passed - number expected."
 					);
 				});
 		});

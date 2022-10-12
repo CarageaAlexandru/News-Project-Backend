@@ -1,5 +1,9 @@
 const express = require("express");
-const { getArticleById, patchArticleById } = require("./controllers/articles");
+const {
+	getArticleById,
+	patchArticleById,
+	getAllArticles,
+} = require("./controllers/articles");
 const { getTopics } = require("./controllers/topics");
 const { getAllUsers } = require("./controllers/users");
 const app = express();
@@ -10,6 +14,7 @@ app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);
 app.patch("/api/articles/:article_id", patchArticleById);
 app.get("/api/users", getAllUsers);
+app.get("/api/articles", getAllArticles);
 
 // Handling JavaScript errors
 app.use((error, req, res, next) => {
@@ -37,7 +42,5 @@ app.use((error, req, res, next) => {
 		res.status(500).send("Server Error!");
 	}
 });
-
-
 
 module.exports = app;

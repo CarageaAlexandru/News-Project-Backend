@@ -1,5 +1,28 @@
 const pool = require("../db/connection");
 
+module.exports.fetchAllArticles = () => {
+	return pool
+		.query(
+			`
+			SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes,
+			COUNT (comments.article_id)::INT AS comment_count
+			FROM
+			comments
+			RIGHT JOIN articles
+			ON
+			articles.article_id = comments.article_id
+			GROUP BY (articles.article_id)
+			ORDER BY articles.created_at DESC
+			`
+		)
+		.then(({ rows: articles }) => {
+			return articles;
+		})
+		.catch((error) => {
+			return Promise.reject(error);
+		});
+};
+
 module.exports.fetchArticleById = (article_id) => {
 	// do i need to add same error handling to patch route?
 	if (isNaN(article_id) === true) {

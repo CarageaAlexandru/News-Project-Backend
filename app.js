@@ -11,7 +11,6 @@ app.get("/api/articles/:article_id", getArticleById);
 app.patch("/api/articles/:article_id", patchArticleById);
 app.get("/api/users", getAllUsers);
 
-// Handling JavaScript errors
 app.use((error, req, res, next) => {
 	if (error.status && error.message) {
 		res.status(error.status).send({
@@ -22,9 +21,7 @@ app.use((error, req, res, next) => {
 	}
 });
 
-// Handling psql errors
 app.use((error, req, res, next) => {
-	console.log(error);
 	if (error.code === "22P02") {
 		res.status(400).send({
 			message: "Invalid argument passed - number expected.",
@@ -37,7 +34,5 @@ app.use((error, req, res, next) => {
 		res.status(500).send("Server Error!");
 	}
 });
-
-
 
 module.exports = app;

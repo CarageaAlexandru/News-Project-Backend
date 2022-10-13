@@ -41,7 +41,12 @@ app.use((error, req, res, next) => {
 		res.status(400).send({
 			message: "Invalid object passed - must be inc_votes.",
 		});
-	} else {
+	} else if (error.code === "23503") {
+		res.status(400).send({
+			message: "Username must be in the database."
+		})
+	}
+	else {
 		res.status(500).send("Server Error!");
 	}
 });

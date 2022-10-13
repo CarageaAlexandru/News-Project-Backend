@@ -457,6 +457,20 @@ describe("Error handing", () => {
 					);
 				});
 		});
+		test("should respond with status:400 if empty properties are passed in", () => {
+			const userNotInDatabase = {
+				username: "notInDatabase",
+				body: "Aut fugiat eos distinctio culpa est est maxime. Maiores nihil quos velit minus beatae. Dolore eos tenetur voluptates nemo.",
+			};
+			return request(app)
+				.post("/api/articles/2/comments")
+				.send(userNotInDatabase)
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe("Username must be in the database.");
+				});
+		});
 		test("should respond with status:400 article_id is not a number", () => {
 			return request(app)
 				.post("/api/articles/notANumber/comments")

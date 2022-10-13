@@ -82,9 +82,9 @@ module.exports.updateArticleById = (article_id, newVote) => {
 	return pool
 		.query(
 			`
-		UPDATE articles
-		SET votes = votes + $1
-		WHERE article_id = $2 RETURNING *;`,
+			UPDATE articles
+			SET votes = votes + $1
+			WHERE article_id = $2 RETURNING *;`,
 			[updateVotesBy, article_id]
 		)
 		.then(({ rows: updatedArticle }) => {
@@ -92,5 +92,26 @@ module.exports.updateArticleById = (article_id, newVote) => {
 		})
 		.catch((error) => {
 			return Promise.reject(error);
+		});
+};
+
+module.exports.fetchCommentsByArticleId = (article_id) => {
+	return pool
+		.query(
+			`
+			SELECT comment_id, votes, created_at, author, body FROM comments
+			WHERE article_id = $1
+			ORDER BY created_at DESC;`,
+			[article_id]
+		)
+		.then(({ rows: comments }) => {
+			if (comments.length === 0) {
+				return Promise.reject({
+					status: 404,
+					message:
+						"There are no matches based on specified article_id in the database.",
+				});
+			}
+			return comments;
 		});
 };

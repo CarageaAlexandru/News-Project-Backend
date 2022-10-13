@@ -5,6 +5,7 @@ const {
 	userData,
 } = require("../db/data/test-data");
 const request = require("supertest");
+const sorted = require("jest-sorted");
 const app = require("../app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
@@ -121,6 +122,80 @@ describe("Endpoint integration", () => {
 				});
 		});
 	});
+	describe("8. GET /api/articles", () => {
+		test(`should respond with an articles array of article objects each with following properties 
+			author - username from users table
+			title
+			article_id
+			topic
+			created_at
+			votes
+			comment_count - total count of comments with the article_id
+			The articles should be sorted by date in descending order.`, () => {
+			return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body }) => {
+					const { articles } = body;
+					expect(articles).toBeInstanceOf(Array);
+					expect(articles).toHaveLength(12);
+					expect(articles).toBeSortedBy("created_at", {
+						descending: true,
+					});
+					articles.forEach((article) => {
+						expect.objectContaining({
+							author: expect.any(String),
+							title: expect.any(String),
+							topic: expect.any(String),
+							created_at: expect.any(String),
+							votes: expect.any(Number),
+							comment_count: expect.any(Number),
+						});
+					});
+				});
+		});
+		test(`should accept the following query: topic which filters the topic by specified value
+			If the query is omitted the endpoing should respond with all articles`, () => {
+			return request(app)
+				.get("/api/articles?topic=mitch")
+				.expect(200)
+				.then(({ body }) => {
+					const { articles } = body;
+					expect(articles).toBeInstanceOf(Array);
+					expect(articles).toHaveLength(11);
+					articles.forEach((article) => {
+						expect.objectContaining({
+							author: expect.any(String),
+							title: expect.any(String),
+							topic: "mitch",
+							created_at: expect.any(String),
+							votes: expect.any(Number),
+							comment_count: expect.any(Number),
+						});
+					});
+				});
+		});
+		test("should accept topic as query and filter the topics by specified value", () => {
+			return request(app)
+				.get("/api/articles?topic=cats")
+				.expect(200)
+				.then(({ body }) => {
+					const { articles } = body;
+					expect(articles).toBeInstanceOf(Array);
+					expect(articles).toHaveLength(1);
+					articles.forEach((article) => {
+						expect.objectContaining({
+							author: expect.any(String),
+							title: expect.any(String),
+							topic: "cats",
+							created_at: expect.any(String),
+							votes: expect.any(Number),
+							comment_count: expect.any(Number),
+						});
+					});
+				});
+		});
+	});
 });
 
 describe("Error handing", () => {
@@ -193,6 +268,19 @@ describe("Error handing", () => {
 					const { message } = body;
 					expect(message).toBe(
 						"Invalid object passed - must be inc_votes."
+					);
+				});
+		});
+	});
+	describe("5. GET /api/articles", () => {
+		test(`should return status:200 if sorting query: "topic" does not exist in database.`, () => {
+			return request(app)
+				.get("/api/articles?topic=badInput")
+				.expect(200)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe(
+						"There are no matches based on specified topic in the database."
 					);
 				});
 		});

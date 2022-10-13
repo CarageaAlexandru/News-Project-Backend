@@ -457,7 +457,7 @@ describe("Error handing", () => {
 					);
 				});
 		});
-		test("should respond with status:400 if empty properties are passed in", () => {
+		test("should respond with status:400 if username does not exist in database.", () => {
 			const userNotInDatabase = {
 				username: "notInDatabase",
 				body: "Aut fugiat eos distinctio culpa est est maxime. Maiores nihil quos velit minus beatae. Dolore eos tenetur voluptates nemo.",

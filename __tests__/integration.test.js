@@ -27,7 +27,7 @@ describe("Endpoint integration", () => {
 					expect(topics).toBeInstanceOf(Array);
 					expect(topics).toHaveLength(3);
 					topics.forEach((topic) => {
-						expect.objectContaining({
+						expect(topic).toMatchObject({
 							slug: expect.any(String),
 							description: expect.any(String),
 						});
@@ -69,7 +69,7 @@ describe("Endpoint integration", () => {
 					expect(users).toBeInstanceOf(Array);
 					expect(users).toHaveLength(4);
 					users.forEach((user) => {
-						expect.objectContaining({
+						expect(user).toMatchObject({
 							username: expect.any(String),
 							name: expect.any(String),
 							avatar_url: expect.any(String),
@@ -143,7 +143,7 @@ describe("Endpoint integration", () => {
 						descending: true,
 					});
 					articles.forEach((article) => {
-						expect.objectContaining({
+						expect(article).toMatchObject({
 							author: expect.any(String),
 							title: expect.any(String),
 							topic: expect.any(String),
@@ -164,7 +164,7 @@ describe("Endpoint integration", () => {
 					expect(articles).toBeInstanceOf(Array);
 					expect(articles).toHaveLength(11);
 					articles.forEach((article) => {
-						expect.objectContaining({
+						expect(article).toMatchObject({
 							author: expect.any(String),
 							title: expect.any(String),
 							topic: "mitch",
@@ -184,7 +184,7 @@ describe("Endpoint integration", () => {
 					expect(articles).toBeInstanceOf(Array);
 					expect(articles).toHaveLength(1);
 					articles.forEach((article) => {
-						expect.objectContaining({
+						expect(article).toMatchObject({
 							author: expect.any(String),
 							title: expect.any(String),
 							topic: "cats",
@@ -248,6 +248,55 @@ describe("Endpoint integration", () => {
 						created_at: expect.any(String),
 						author: "butter_bridge",
 						body: "There's no shame in fear, my father told me, what matters is how we face it.",
+					});
+				});
+		});
+	});
+	describe("11. GET /api/articles (queries)", () => {
+		test("should add query: 'sort_by' which can sorty by any valid column", () => {
+			"valid columns: title, topic, author, body , votes, created_at";
+			return request(app)
+				.get("/api/articles?sort_by=votes")
+				.expect(200)
+				.then(({ body }) => {
+					const { articles } = body;
+					expect(articles).toBeInstanceOf(Array);
+					expect(articles).toHaveLength(12);
+					expect(articles).toBeSortedBy("votes", {
+						descending: true,
+					});
+					articles.forEach((article) => {
+						expect(article).toMatchObject({
+							author: expect.any(String),
+							title: expect.any(String),
+							topic: expect.any(String),
+							created_at: expect.any(String),
+							votes: expect.any(Number),
+							comment_count: expect.any(Number),
+						});
+					});
+				});
+		});
+		test("should add query: 'order_by' which can be set to ASC or DESC (defaults to descending)", () => {
+			return request(app)
+				.get("/api/articles?order=asc")
+				.expect(200)
+				.then(({ body }) => {
+					const { articles } = body;
+					expect(articles).toBeInstanceOf(Array);
+					expect(articles).toHaveLength(12);
+					expect(articles).toBeSortedBy("created_at", {
+						descending: false,
+					});
+					articles.forEach((article) => {
+						expect(article).toMatchObject({
+							author: expect.any(String),
+							title: expect.any(String),
+							topic: expect.any(String),
+							created_at: expect.any(String),
+							votes: expect.any(Number),
+							comment_count: expect.any(Number),
+						});
 					});
 				});
 		});
@@ -387,10 +436,9 @@ describe("Error handing", () => {
 					);
 				});
 		});
-
-		test("should respond with status:404 if article_id is not in the database", () => {
+		xtest("should respond with status:404 if article_id is not in the database and display no matching record", () => {
 			return request(app)
-				.get("/api/articles/9899532/comments")
+				.post("/api/articles/9899532/comments")
 				.expect(404)
 				.then(({ body }) => {
 					const { message } = body;
@@ -401,13 +449,33 @@ describe("Error handing", () => {
 		});
 		test("should respond with status:400 article_id is not a number", () => {
 			return request(app)
-				.get("/api/articles/notANumber/comments")
+				.post("/api/articles/notANumber/comments")
 				.expect(400)
 				.then(({ body }) => {
 					const { message } = body;
 					expect(message).toBe(
 						"Invalid argument passed - number expected."
 					);
+				});
+		});
+	});
+	describe("8 GET /api/articles (queries)", () => {
+		test("should return status: 400 for invalid sort_query", () => {
+			return request(app)
+				.get("/api/articles?sort_by=wrongSortingValue")
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe("Invalid sort query value.");
+				});
+		});
+		test("should return status: 400 for invalid order query", () => {
+			return request(app)
+				.get("/api/articles?order=wrongOrderValue")
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe("Invalid order query value.");
 				});
 		});
 	});

@@ -1,7 +1,31 @@
 const pool = require("../db/connection");
 
-module.exports.fetchAllArticles = (topic) => {
+module.exports.fetchAllArticles = (
+	sort_by = "created_at",
+	order = "desc",
+	topic
+) => {
+	const validSortingQueries = [
+		"title",
+		"topic",
+		"author",
+		"body",
+		"votes",
+		"created_at",
+	];
+	const validOrderQueries = ["asc", "desc"];
 	const queryParams = [];
+	if (!validSortingQueries.includes(sort_by)) {
+		return Promise.reject({
+			status: 400,
+			message: "Invalid sort query value.",
+		});
+	} else if (!validOrderQueries.includes(order)) {
+		return Promise.reject({
+			status: 400,
+			message: "Invalid order query value.",
+		});
+	}
 	let baseQuery = `
 			SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes,
 			COUNT (comments.article_id)::INT AS comment_count
@@ -16,12 +40,12 @@ module.exports.fetchAllArticles = (topic) => {
 		baseQuery += `
 		WHERE topic LIKE $1
 		GROUP BY (articles.article_id)
-		ORDER BY articles.created_at DESC;
+		ORDER BY articles.${sort_by} ${order};
 		`;
 	} else {
 		baseQuery += `
 		GROUP BY (articles.article_id)
-		ORDER BY articles.created_at DESC;
+		ORDER BY articles.${sort_by} ${order};
 		`;
 	}
 	return pool
@@ -118,7 +142,12 @@ module.exports.fetchCommentsByArticleId = (article_id) => {
 
 module.exports.insertCommentByArticleId = (newComment, article_id) => {
 	const { username, body } = newComment;
-
+	if (isNaN(article_id)) {
+		return Promise.reject({
+			status: 400,
+			message: "Invalid argument passed - number expected.",
+		});
+	}
 	if (
 		username === undefined ||
 		body === undefined ||
@@ -131,16 +160,28 @@ module.exports.insertCommentByArticleId = (newComment, article_id) => {
 				"Object properties are not valid - username and body should not be empty.",
 		});
 	}
+
 	return pool
-		.query(
-			`
-			INSERT INTO comments(article_id, author, body)
-			VALUES ($1, $2, $3)
-			RETURNING *;`,
-			[article_id, username, body]
-		)
-		.then(({ rows: insertedComment }) => {
-			console.log(insertedComment);
-			return insertedComment[0];
+		.query("SELECT * FROM articles WHERE article_id = $1", [article_id])
+		.then(({ rows: id }) => {
+			if (id.length < 0) {
+				return Promise.reject({
+					status: 400,
+					message: "No matching record.",
+				});
+			}
+		})
+		.then(() => {
+			return pool
+				.query(
+					`
+					INSERT INTO comments(article_id, author, body)
+					VALUES ($1, $2, $3)
+					RETURNING *;`,
+					[article_id, username, body]
+				)
+				.then(({ rows: insertedComment }) => {
+					return insertedComment[0];
+				});
 		});
 };

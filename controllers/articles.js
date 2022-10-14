@@ -7,8 +7,8 @@ const {
 } = require("../models/articles");
 
 module.exports.getAllArticles = (request, response, next) => {
-	const { topic } = request.query;
-	fetchAllArticles(topic)
+	const { sort_by, order, topic } = request.query;
+	fetchAllArticles(sort_by, order, topic)
 		.then((articles) => {
 			response.status(200).send({ articles });
 		})

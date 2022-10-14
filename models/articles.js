@@ -166,8 +166,9 @@ module.exports.insertCommentByArticleId = (newComment, article_id) => {
 		.then(({ rows: id }) => {
 			if (id.length === 0) {
 				return Promise.reject({
-					status: 400,
-					message: "There are no matches based on specified article_id in the database.",
+					status: 404,
+					message:
+						"There are no matches based on specified article_id in the database.",
 				});
 			}
 		})

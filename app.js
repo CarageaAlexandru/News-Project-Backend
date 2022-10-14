@@ -1,4 +1,5 @@
 const express = require("express");
+const { getIndexPage } = require("./controllers");
 const {
 	getArticleById,
 	patchArticleById,
@@ -14,7 +15,7 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/",)
+app.get("/", getIndexPage);
 app.get("/api", getAllEndpoints);
 app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);

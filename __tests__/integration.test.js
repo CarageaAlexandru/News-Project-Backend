@@ -9,6 +9,7 @@ const sorted = require("jest-sorted");
 const app = require("../app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
+const endpointsData = require("../endpoints");
 
 beforeEach(() => seed({ articleData, commentData, topicData, userData }));
 
@@ -17,6 +18,17 @@ afterAll(() => {
 });
 
 describe("Endpoint integration", () => {
+	describe("GET /api", () => {
+		test("should respond with an json object with all available endpoints and instructions.", () => {
+			return request(app)
+				.get("/api")
+				.expect(200)
+				.then(({ body }) => {
+					const { endpointsInfo } = body;
+					expect(endpointsInfo).toEqual(endpointsData);
+				});
+		});
+	});
 	describe("1. GET /api/topics", () => {
 		test("should respond with status: 200 and display an array of topics with slug and description properties", () => {
 			return request(app)
@@ -441,7 +453,7 @@ describe("Error handing", () => {
 					);
 				});
 		});
-		xtest("should respond with status:404 if article_id is not in the database and display no matching record", () => {
+		test("should respond with status:404 if article_id is not in the database and display no matching record", () => {
 			const commentNotMatchingId = {
 				username: "butter_bridge",
 				body: "There's no shame in fear, my father told me, what matters is how we face it.",
@@ -455,6 +467,20 @@ describe("Error handing", () => {
 					expect(message).toBe(
 						"There are no matches based on specified article_id in the database."
 					);
+				});
+		});
+		test("should respond with status:400 if username does not exist in database.", () => {
+			const userNotInDatabase = {
+				username: "notInDatabase",
+				body: "Aut fugiat eos distinctio culpa est est maxime. Maiores nihil quos velit minus beatae. Dolore eos tenetur voluptates nemo.",
+			};
+			return request(app)
+				.post("/api/articles/2/comments")
+				.send(userNotInDatabase)
+				.expect(400)
+				.then(({ body }) => {
+					const { message } = body;
+					expect(message).toBe("Username must be in the database.");
 				});
 		});
 		test("should respond with status:400 article_id is not a number", () => {

@@ -7,12 +7,14 @@ const {
 	postCommentByArticleId,
 } = require("./controllers/articles");
 const { deleteCommentById } = require("./controllers/comments");
+const { getAllEndpoints } = require("./controllers/endpoints");
 const { getTopics } = require("./controllers/topics");
 const { getAllUsers } = require("./controllers/users");
 const app = express();
 
 app.use(express.json());
 
+app.get("/api", getAllEndpoints);
 app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
@@ -40,6 +42,10 @@ app.use((error, req, res, next) => {
 	} else if (error.code === "23502") {
 		res.status(400).send({
 			message: "Invalid object passed - must be inc_votes.",
+		});
+	} else if (error.code === "23503") {
+		res.status(400).send({
+			message: "Username must be in the database.",
 		});
 	} else {
 		res.status(500).send("Server Error!");

@@ -6,6 +6,7 @@ const {
 	getCommentsByArticleId,
 	postCommentByArticleId,
 } = require("./controllers/articles");
+const { deleteCommentById } = require("./controllers/comments");
 const { getTopics } = require("./controllers/topics");
 const { getAllUsers } = require("./controllers/users");
 const app = express();
@@ -19,9 +20,9 @@ app.post("/api/articles/:article_id/comments", postCommentByArticleId);
 app.patch("/api/articles/:article_id", patchArticleById);
 app.get("/api/users", getAllUsers);
 app.get("/api/articles", getAllArticles);
+app.delete("/api/comments/:comment_id", deleteCommentById);
 
 app.use((error, req, res, next) => {
-	console.log(error);
 	if (error.status && error.message) {
 		res.status(error.status).send({
 			message: error.message,

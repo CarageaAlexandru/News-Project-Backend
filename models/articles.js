@@ -164,10 +164,10 @@ module.exports.insertCommentByArticleId = (newComment, article_id) => {
 	return pool
 		.query("SELECT * FROM articles WHERE article_id = $1", [article_id])
 		.then(({ rows: id }) => {
-			if (id.length < 0) {
+			if (id.length === 0) {
 				return Promise.reject({
 					status: 400,
-					message: "No matching record.",
+					message: "There are no matches based on specified article_id in the database.",
 				});
 			}
 		})

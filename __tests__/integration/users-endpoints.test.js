@@ -34,3 +34,28 @@ describe("5. GET /api/users", () => {
 			});
 	});
 });
+describe("17.GET /api/users/:username", () => {
+	test("should respond with an object which should have the following properties: username, avatar_url, name.", () => {
+		// to check this test again
+		const validUsernames = userData.map((user) => {
+			return user.username;
+		});
+		const max = validUsernames.length;
+		function getRandomInt(max) {
+			return Math.floor(Math.random() * max);
+		}
+		const randomUsername = getRandomInt(max);
+		return request(app)
+			.get(`/api/users/${validUsernames[randomUsername]}`)
+			.expect(200)
+			.then(({ body }) => {
+				const { user } = body;
+				expect(user).toBeInstanceOf(Object);
+				expect(user).toMatchObject({
+					username: `${validUsernames[randomUsername]}`,
+					name: expect.any(String),
+					avatar_url: expect.any(String),
+				});
+			});
+	});
+});

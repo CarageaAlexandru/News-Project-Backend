@@ -14,6 +14,7 @@ const app = express();
 
 app.use(express.json());
 
+app.get("/",)
 app.get("/api", getAllEndpoints);
 app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);

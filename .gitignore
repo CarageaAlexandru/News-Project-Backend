@@ -1,6 +1,5 @@
 node_modules
 .env.*
-endpoints.js
 endpoints.json
 error-handling.md
 hosting.md

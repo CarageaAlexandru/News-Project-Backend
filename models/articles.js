@@ -12,6 +12,7 @@ module.exports.fetchAllArticles = (
 		"body",
 		"votes",
 		"created_at",
+		"comment_count",
 	];
 	const validOrderQueries = ["asc", "desc"];
 	const queryParams = [];
@@ -27,25 +28,26 @@ module.exports.fetchAllArticles = (
 		});
 	}
 	let baseQuery = `
-			SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes,
+			SELECT articles.author, articles.title, articles.article_id,
+			articles.topic,articles.created_at, articles.votes,
 			COUNT (comments.article_id)::INT AS comment_count
 			FROM
 			comments
 			RIGHT JOIN articles
 			ON
-			articles.article_id = comments.article_id
+			comments.article_id = articles.article_id
 			`;
 	if (topic) {
 		queryParams.push(topic);
 		baseQuery += `
 		WHERE topic LIKE $1
 		GROUP BY (articles.article_id)
-		ORDER BY articles.${sort_by} ${order};
+		ORDER BY ${sort_by} ${order};
 		`;
 	} else {
 		baseQuery += `
 		GROUP BY (articles.article_id)
-		ORDER BY articles.${sort_by} ${order};
+		ORDER BY ${sort_by} ${order};
 		`;
 	}
 	return pool

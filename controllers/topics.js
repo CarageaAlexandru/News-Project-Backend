@@ -1,6 +1,6 @@
 const { fetchTopics } = require("../models/topics");
 
-module.exports.getTopics = (request, response) => {
+module.exports.getTopics = (request, response, next) => {
 	fetchTopics()
 		.then((topics) => {
 			response.status(200).send({ topics });

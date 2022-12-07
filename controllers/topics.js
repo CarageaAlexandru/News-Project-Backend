@@ -7,6 +7,6 @@ module.exports.getTopics = (request, response, next) => {
 		})
 		.catch((error) => {
 			console.log(error);
-			next(err);
+			next(error);
 		});
 };

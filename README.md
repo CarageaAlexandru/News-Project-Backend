@@ -10,9 +10,9 @@ This will be used as the backend for an upcoming front-end application where we 
 
 ## Hosted Version
 
-You can see a live version of this app, hosted with `Heroku`:
+You can see a live version of this app, hosted with `Cyclic`:
 
-https://caragea-nc-news-backend.herokuapp.com/api
+https://caragea-nc-news-backend.cyclic.app/api
 
 ## Setup Instructions
 
